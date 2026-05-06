@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Transfer Web</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f3f4f6;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .app-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .drop-zone {
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+            background: #fafafa;
+        }
+
+        .drop-zone:hover, .drop-zone--over {
+            border-color: var(--primary);
+            background: #eef2ff;
+        }
+
+        .drop-zone__input { display: none; }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .file-info { flex-grow: 1; margin-left: 10px; }
+        
+        .file-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: block;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <h1>Share</h1>
+            <p>Select files to share
+            </p>
+        </header>
+
+        <div id="drop-zone" class="drop-zone">
+            <p><strong>Click to upload</p>
+            <span style="font-size: 0.8rem; color: #6b7280;"></span>
+            <input type="file" id="file-input" class="drop-zone__input" multiple>
+        </div>
+
+        <div id="file-list-container">
+            <ul id="file-list" style="list-style: none; padding: 0;"></ul>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById("drop-zone");
+        const fileInput = document.getElementById("file-input");
+        const fileList = document.getElementById("file-list");
+        dropZone.onclick = () => fileInput.click();
+
+        fileInput.onchange = (e) => handleFiles(e.target.files);
+
+        dropZone.ondragover = (e) => {
+            e.preventDefault();
+            dropZone.classList.add("drop-zone--over");
+        };
+
+        dropZone.ondragleave = () => dropZone.classList.remove("drop-zone--over");
+
+        dropZone.ondrop = (e) => {
+            e.preventDefault();
+            dropZone.classList.remove("drop-zone--over");
+            handleFiles(e.dataTransfer.files);
+        };
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                const listItem = createFileElement(file);
+                fileList.appendChild(listItem);
+                simulateUpload(listItem);
+            });
+        }
+
+        function createFileElement(file) {
+            const li = document.createElement("li");
+            li.className = "file-item";
+            li.innerHTML = `
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                    <span class="file-name">${file.name}</span>
+                    <div class="progress-bar"><div class="progress-fill"></div></div>
+                </div>
+            `;
+            return li;
+        }
+
+        function simulateUpload(element) {
+            const fill = element.querySelector(".progress-fill");
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    element.querySelector(".file-info").insertAdjacentHTML('beforeend', 
+                        '<span style="color: #10b981; font-size: 0.75rem;">Successfully Uploaded</span>');
+                } else {
+                    width += Math.random() * 20;
+                    fill.style.width = Math.min(width, 100) + "%";
+                }
+            }, 300);
+        }
+    </script>
+</body>
+</html>
